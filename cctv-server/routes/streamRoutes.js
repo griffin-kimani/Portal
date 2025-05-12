@@ -4,7 +4,7 @@ const authMiddleware = require('../middleware/authMiddleware');
 
 const router = express.Router();
 
-const streams = {}; // Keep track of active streams
+const streams = {}; 
 
 router.post('/start', authMiddleware, (req, res) => {
   const { cameraId, rtspUrl } = req.body;

@@ -7,7 +7,7 @@ const router = express.Router();
 router.get('/', authMiddleware, async (req, res) => {
   const cameras = await Camera.find({ addedBy: req.user.username });
   res.json({ cameras });
-});
+}); 
 
 router.post('/add', authMiddleware, async (req, res) => {
   const { name, location, rtspUrl } = req.body;

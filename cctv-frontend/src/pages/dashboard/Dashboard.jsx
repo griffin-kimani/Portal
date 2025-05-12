@@ -1,18 +1,30 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import JSMpeg from 'jsmpeg'; 
+import JSMpeg from 'jsmpeg-player';
 
 const Dashboard = () => {
   const navigate = useNavigate();
   const canvasRef = useRef(null);
+  const [player, setPlayer] = useState(null);
 
   useEffect(() => {
-    const wsUrl = 'ws://localhost:9999'; 
+    const wsUrl = 'ws://localhost:9999';
     const canvas = canvasRef.current;
 
     if (canvas) {
-      new JSMpeg.Player(wsUrl, { canvas });
+      try {
+        const newPlayer = new JSMpeg.Player(wsUrl, { canvas });
+        setPlayer(newPlayer);
+      } catch (error) {
+        console.error('Failed to initialize JSMpeg Player:', error);
+      }
     }
+
+    return () => {
+      if (player && player.socket) {
+        player.destroy();
+      }
+    };
   }, []);
 
   const handleLogout = () => {
@@ -23,7 +35,9 @@ const Dashboard = () => {
   return (
     <div className="p-6">
       <h1 className="text-3xl font-bold mb-4 text-center">Dashboard</h1>
-      <p className="text-lg text-center mb-6">Welcome back, admin! Here's what's happening with your CCTV system:</p>
+      <p className="text-lg text-center mb-6">
+        Welcome back, admin! Here's what's happening with your CCTV system:
+      </p>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="bg-white rounded-xl shadow p-4 text-center">
@@ -32,7 +46,9 @@ const Dashboard = () => {
         </div>
         <div className="bg-white rounded-xl shadow p-4">
           <h2 className="text-xl font-semibold mb-2">Activity Summary</h2>
-          <p className="text-gray-600">Recent events, motion alerts, or logs can be listed here.</p>
+          <p className="text-gray-600">
+            Recent events, motion alerts, or logs can be listed here.
+          </p>
         </div>
       </div>
 
