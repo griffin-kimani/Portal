@@ -21,7 +21,7 @@ const Dashboard = () => {
     }
 
     return () => {
-      if (player && player.socket) {
+      if (player && player.destroy) {
         player.destroy();
       }
     };
@@ -30,6 +30,10 @@ const Dashboard = () => {
   const handleLogout = () => {
     localStorage.removeItem('isLoggedIn');
     navigate('/');
+  };
+
+  const handleViewArchive = () => {
+    navigate('/footage-archive'); // or `/footage/:cameraId` once you implement it
   };
 
   return (
@@ -50,6 +54,15 @@ const Dashboard = () => {
             Recent events, motion alerts, or logs can be listed here.
           </p>
         </div>
+      </div>
+
+      <div className="mt-6 text-center">
+        <button
+          onClick={handleViewArchive}
+          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
+        >
+          View Archive
+        </button>
       </div>
 
       <div className="mt-8 text-center">

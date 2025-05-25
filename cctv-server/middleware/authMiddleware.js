@@ -1,23 +1,19 @@
 const jwt = require('jsonwebtoken');
 
 if (!process.env.JWT_SECRET) {
-  console.warn('Warning: JWT_SECRET is not set');
+  console.warn('⚠️  JWT_SECRET is not set in your .env');
 }
 
-const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+module.exports = (req, res, next) => {
+  const header = req.header('Authorization');
+  if (!header?.startsWith('Bearer '))
     return res.status(401).json({ message: 'No token provided' });
-  }
 
-  const token = authHeader.split(' ')[1];
+  const token = header.split(' ')[1];
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    req.user = jwt.verify(token, process.env.JWT_SECRET);
     next();
-  } catch (err) {
-    return res.status(401).json({ message: 'Invalid or expired token' });
+  } catch {
+    res.status(401).json({ message: 'Invalid or expired token' });
   }
 };
-
-module.exports = authMiddleware;

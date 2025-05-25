@@ -1,15 +1,23 @@
 require('dotenv').config();
-const express = require('express');
-const cors = require('cors');
-const connectDB = require('./config/db');
-const authRoutes = require('./routes/authRoutes');
-const cameraRoutes = require('./routes/cameraRoutes');
-const logoutRoutes = require('./routes/logoutRoutes');
-const streamRoutes = require('./routes/streamRoutes');
-const authMiddleware = require('./middleware/authMiddleware');
+const express    = require('express');
+const http       = require('http');
+const WebSocket  = require('ws');
+const cors       = require('cors');
+const { spawn }  = require('child_process');
+const which      = require('which');
+const connectDB  = require('./config/connectDB');
 
-const app = express();
-const PORT = process.env.PORT || 5000;
+const authRoutes     = require('./routes/authRoutes');
+const siteRoutes     = require('./routes/siteRoutes');
+const cameraRoutes   = require('./routes/cameraRoutes');
+const footageRoutes  = require('./routes/footageRoutes');
+
+const authMiddleware = require('./middleware/authMiddleware');
+const Camera         = require('./models/Camera');
+
+const app    = express();
+const server = http.createServer(app);
+const wss    = new WebSocket.Server({ server });
 
 
 connectDB();
@@ -17,41 +25,66 @@ connectDB();
 
 app.use(cors({
   origin: 'http://localhost:5173',
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true,
+  credentials: true
 }));
-
 app.use(express.json());
 
 
-app.use((req, res, next) => {
-  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
-  next();
+app.use('/api/auth',    authRoutes);
+app.use('/api/sites',   authMiddleware, siteRoutes);
+app.use('/api/cameras', authMiddleware, cameraRoutes);
+app.use('/api/footage', authMiddleware, footageRoutes);
+
+
+const ffmpegPath = which.sync('ffmpeg', { nothrow: true });
+
+if (!ffmpegPath) {
+  console.error('❌ FFmpeg not found in PATH');
+  process.exit(1);
+}
+
+
+wss.on('connection', async ws => {
+  const cam = await Camera.findOne();
+  if (!cam) {
+    ws.send('❌ No camera configured');
+    return ws.close();
+  }
+
+  const ffmpeg = spawn(ffmpegPath, [
+    '-i', cam.rtspUrl,
+    '-f', 'mpegts',
+    '-codec:v', 'mpeg1video',
+    '-stats', '-r', '30', '-'
+  ]);
+
+  ffmpeg.stdout.on('data', data => {
+    if (ws.readyState === WebSocket.OPEN) {
+      ws.send(data);
+    }
+  });
+
+  ffmpeg.stderr.on('data', err => {
+    console.error('FFmpeg error:', err.toString());
+  });
+
+  ffmpeg.on('close', () => ws.close());
+  ws.on('close', () => ffmpeg.kill('SIGINT'));
+  ws.on('error', () => ffmpeg.kill('SIGINT'));
 });
 
 
-app.use('/api/auth', authRoutes);
-app.use('/api/cameras', cameraRoutes);
-app.use('/api/logout', logoutRoutes);
-app.use('/api/stream', streamRoutes);
+const PORT = process.env.PORT || 5000;
 
-
-app.get('/api/dashboard', authMiddleware, (req, res) => {
-  res.json({ message: `Welcome, ${req.user.username}!` });
+server.listen(PORT, () => {
+  console.log(`🚀 API & WebSocket server running on port ${PORT}`);
 });
 
 
-app.get('/', (req, res) => {
-  res.send('📡 Smart CCTV API is live.');
-});
-
-
-app.use((err, req, res, next) => {
-  console.error('❌ Server Error:', err.stack);
-  res.status(500).json({ message: 'Internal server error' });
-});
-
-app.listen(PORT, () => {
-  console.log(`🚀 Server running on port ${PORT}`);
+process.on('SIGINT', () => {
+  console.log('\n🛑 Server shutting down...');
+  server.close(() => {
+    console.log('🔌 HTTP/WebSocket server closed.');
+    process.exit(0);
+  });
 });
