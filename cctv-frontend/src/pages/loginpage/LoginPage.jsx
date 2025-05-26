@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { handlePushSetup } from '../../hooks/usePushNotifications';
 import './loginpage.css';
 
 const LoginPage = () => {
@@ -41,6 +42,7 @@ const LoginPage = () => {
       }
 
       localStorage.setItem('token', data.token);
+      await handlePushSetup(data.token); // Register push notifications
       navigate('/dashboard');
     } catch (err) {
       console.error('Login error:', err);
