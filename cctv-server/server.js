@@ -7,7 +7,7 @@ const { spawn }  = require('child_process');
 const which      = require('which');
 const connectDB  = require('./config/connectDB');
 
-const authRoutes     = require('./routes/authRoutes');
+const auth     = require('./routes/auth');
 const siteRoutes     = require('./routes/siteRoutes');
 const cameraRoutes   = require('./routes/cameraRoutes');
 const footageRoutes  = require('./routes/footageRoutes');
@@ -23,10 +23,18 @@ const wss    = new WebSocket.Server({ server });
 
 connectDB();
 
-app.use(cors({ origin: 'http://localhost:5173', credentials: true }));
+const corsOptions = {
+  origin: 'http://localhost:5173',
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+};
+
+app.use(cors(corsOptions));
+
 app.use(express.json());
 
-app.use('/api/auth',     authRoutes);
+app.use('/api/auth',     auth);
 app.use('/api/sites',    authMiddleware, siteRoutes);
 app.use('/api/cameras',  authMiddleware, cameraRoutes);
 app.use('/api/footage',  authMiddleware, footageRoutes);

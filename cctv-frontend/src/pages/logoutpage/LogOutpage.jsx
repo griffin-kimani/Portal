@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-const LogOutpage = () => {
+const LogoutPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -10,10 +10,10 @@ const LogOutpage = () => {
   }, [navigate]);
 
   return (
-    <div className="flex items-center justify-center h-screen">
-      <h1 className="text-2xl font-bold">Logging out...</h1>
+    <div className="flex items-center justify-center h-screen bg-gray-100">
+      <h1 className="text-xl font-semibold text-gray-700">Logging out...</h1>
     </div>
   );
 };
 
-export default LogOutpage;
+export default LogoutPage;

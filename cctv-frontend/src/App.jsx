@@ -11,53 +11,52 @@ import AddCamera from './pages/addcamera/AddCamera';
 
 function App() {
   return (
-    <Routes>
-      <Route path="/" element={<HomePage />} />
-      <Route path="/login" element={<LoginPage />} />
-      <Route path="/signup" element={<SignupPage />} />
-      <Route path="/logout" element={<LogoutPage />} />
+    <div className="min-h-screen bg-gray-100 font-sans text-gray-800">
+      <Routes>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/signup" element={<SignupPage />} />
+        <Route path="/logout" element={<LogoutPage />} />
 
-      <Route
-        path="/dashboard"
-        element={
-          <ProtectedRoute>
-            <Dashboard />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* New routes for location-based cameras */}
-      <Route
-        path="/cameras"
-        element={
-          <ProtectedRoute>
-            <CamerasBySite />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/cameras"
+          element={
+            <ProtectedRoute>
+              <CamerasBySite />
+            </ProtectedRoute>
+          }
+        />
 
-      <Route
-        path="/add-camera"
-        element={
-          <ProtectedRoute>
-            <AddCamera />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/add-camera"
+          element={
+            <ProtectedRoute>
+              <AddCamera />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Footage archive route */}
-      <Route
-        path="/footage-archive"
-        element={
-          <ProtectedRoute>
-            <FootageArchive />
-          </ProtectedRoute>
-        }
-      />
+        <Route
+          path="/footage-archive"
+          element={
+            <ProtectedRoute>
+              <FootageArchive />
+            </ProtectedRoute>
+          }
+        />
 
-      {/* Catch-all redirect */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </div>
   );
 }
 

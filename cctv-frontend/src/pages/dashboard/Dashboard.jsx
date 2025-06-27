@@ -1,77 +1,60 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import JSMpeg from 'jsmpeg-player';
 
 const Dashboard = () => {
-  const navigate = useNavigate();
   const canvasRef = useRef(null);
-  const [player, setPlayer] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const wsUrl = 'ws://localhost:9999';
-    const canvas = canvasRef.current;
 
-    if (canvas) {
-      try {
-        const newPlayer = new JSMpeg.Player(wsUrl, { canvas });
-        setPlayer(newPlayer);
-      } catch (error) {
-        console.error('Failed to initialize JSMpeg Player:', error);
+    const script = document.createElement('script');
+    script.src = '/js/jsmpeg.min.js'; // ✅ Local path
+    script.async = true;
+
+    script.onload = () => {
+      if (!window.JSMpeg) {
+        console.error('❌ JSMpeg failed to load');
+        return;
       }
-    }
 
+      const player = new window.JSMpeg.Player(wsUrl, {
+        canvas: canvasRef.current,
+        autoplay: true,
+        audio: false,
+      });
+
+      // Clean up player on unmount
+      return () => player.destroy();
+    };
+
+    script.onerror = () => {
+      console.error('❌ Failed to load local JSMpeg script');
+    };
+
+    document.body.appendChild(script);
+
+    // Clean up script tag on unmount
     return () => {
-      if (player && player.destroy) {
-        player.destroy();
-      }
+      document.body.removeChild(script);
     };
   }, []);
 
-  const handleLogout = () => {
-    localStorage.removeItem('isLoggedIn');
-    navigate('/');
-  };
-
-  const handleViewArchive = () => {
-    navigate('/footage-archive'); // or `/footage/:cameraId` once you implement it
-  };
-
   return (
-    <div className="p-6">
-      <h1 className="text-3xl font-bold mb-4 text-center">Dashboard</h1>
-      <p className="text-lg text-center mb-6">
-        Welcome back, admin! Here's what's happening with your CCTV system:
-      </p>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="bg-white rounded-xl shadow p-4 text-center">
-          <h2 className="text-xl font-semibold mb-2">Live Camera Feeds</h2>
-          <canvas ref={canvasRef} width="640" height="360" className="mx-auto border rounded" />
+    <div className="min-h-screen bg-gray-900 text-white p-6">
+      <div className="max-w-5xl mx-auto space-y-6">
+        <h1 className="text-3xl font-bold text-center">Live CCTV Dashboard</h1>
+        <div className="rounded-lg overflow-hidden border border-gray-700 shadow-lg">
+          <canvas ref={canvasRef} className="w-full h-[500px] bg-black" />
         </div>
-        <div className="bg-white rounded-xl shadow p-4">
-          <h2 className="text-xl font-semibold mb-2">Activity Summary</h2>
-          <p className="text-gray-600">
-            Recent events, motion alerts, or logs can be listed here.
-          </p>
+        <div className="text-center">
+          <button
+            onClick={() => navigate('/logout')}
+            className="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md"
+          >
+            Log Out
+          </button>
         </div>
-      </div>
-
-      <div className="mt-6 text-center">
-        <button
-          onClick={handleViewArchive}
-          className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700 transition"
-        >
-          View Archive
-        </button>
-      </div>
-
-      <div className="mt-8 text-center">
-        <button
-          onClick={handleLogout}
-          className="bg-red-600 text-white px-6 py-2 rounded hover:bg-red-700 transition"
-        >
-          Logout
-        </button>
       </div>
     </div>
   );

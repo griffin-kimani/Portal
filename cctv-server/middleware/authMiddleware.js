@@ -1,7 +1,7 @@
 const jwt = require('jsonwebtoken');
 
 if (!process.env.JWT_SECRET) {
-  console.warn('⚠️  JWT_SECRET is not set in your .env');
+  console.warn('  JWT_SECRET is not set in your .env');
 }
 
 module.exports = (req, res, next) => {

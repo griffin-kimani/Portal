@@ -1,59 +1,48 @@
 const express = require('express');
-const { body, validationResult } = require('express-validator');
-const { signup, login, logout } = require('../controllers/authController');
-const authMiddleware = require('../middleware/authMiddleware');
-
+const jwt = require('jsonwebtoken');
+const User = require('../models/User');
 const router = express.Router();
 
 
-router.post(
-  '/signup',
-  [
-    body('username', 'Username is required').trim().notEmpty(),
-    body('password', 'Password must be at least 6 characters').isLength({ min: 6 }),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    try {
-      await signup(req, res);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Server error' });
-    }
-  }
-);
-
-
-router.post(
-  '/login',
-  [
-    body('username', 'Username is required').trim().notEmpty(),
-    body('password', 'Password is required').notEmpty(),
-  ],
-  async (req, res) => {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    try {
-      await login(req, res);
-    } catch (err) {
-      console.error(err);
-      res.status(500).json({ message: 'Server error' });
-    }
-  }
-);
-
-router.post('/logout', authMiddleware, (req, res) => {
+router.post('/signup', async (req, res) => {
   try {
-    logout(req, res);
+    const { username, email, password } = req.body;
+
+    
+    if (!username || !email || !password) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    
+    const existingUser = await User.findOne({ $or: [{ username }, { email }] });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Username or email already exists' });
+    }
+
+    const user = new User({ username, email, password });
+    await user.save();
+    res.status(201).json({ message: 'User created successfully' });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Server error' });
+    res.status(400).json({ message: err.message });
   }
+});
+
+
+router.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  const user = await User.findOne({ username });
+  if (!user || !(await user.comparePassword(password))) {
+    return res.status(401).json({ message: 'Invalid credentials' });
+  }
+
+  const token = jwt.sign(
+    { id: user._id, username: user.username },
+    process.env.JWT_SECRET,
+    { expiresIn: '8h' }
+  );
+
+  res.json({ token });
 });
 
 module.exports = router;

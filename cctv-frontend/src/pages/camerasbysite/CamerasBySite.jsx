@@ -7,7 +7,6 @@ const CamerasBySite = () => {
   const [cameras, setCameras] = useState([]);
 
   useEffect(() => {
-    
     const fetchSites = async () => {
       const res = await api.get('/sites');
       setSites(res.data);
@@ -17,7 +16,6 @@ const CamerasBySite = () => {
 
   useEffect(() => {
     if (selectedSite) {
-      
       const fetchCameras = async () => {
         const res = await api.get(`/cameras/site/${selectedSite}`);
         setCameras(res.data.cameras);
@@ -29,11 +27,11 @@ const CamerasBySite = () => {
   }, [selectedSite]);
 
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">📍 Select Site to View Cameras</h2>
+    <div className="max-w-3xl mx-auto p-6 bg-white shadow-md rounded-lg mt-6">
+      <h2 className="text-2xl font-semibold mb-6 text-gray-800">📍 View Cameras by Site</h2>
 
       <select
-        className="p-2 border rounded mb-4"
+        className="w-full p-3 border border-gray-300 rounded mb-6 focus:outline-none focus:ring-2 focus:ring-blue-500"
         value={selectedSite}
         onChange={(e) => setSelectedSite(e.target.value)}
       >
@@ -46,14 +44,15 @@ const CamerasBySite = () => {
       </select>
 
       <div>
-        <h3 className="text-lg font-semibold mb-2">🎥 Cameras:</h3>
+        <h3 className="text-xl font-medium mb-3 text-gray-700">🎥 Cameras</h3>
         {cameras.length === 0 ? (
-          <p>No cameras found for this site.</p>
+          <p className="text-gray-500 italic">No cameras found for this site.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="grid grid-cols-1 gap-4">
             {cameras.map((camera) => (
-              <li key={camera._id} className="p-2 border rounded bg-gray-50">
-                <strong>{camera.name}</strong> - {camera.location}
+              <li key={camera._id} className="p-4 bg-gray-100 rounded shadow-sm hover:shadow-md transition">
+                <div className="font-semibold text-gray-800">{camera.name}</div>
+                <div className="text-sm text-gray-600">{camera.location}</div>
               </li>
             ))}
           </ul>

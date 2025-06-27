@@ -1,30 +1,58 @@
 const publicVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
 export async function registerPushSubscription(userToken) {
-  if (!('serviceWorker' in navigator)) return console.warn('SW not supported');
+  if (!('serviceWorker' in navigator)) {
+    console.warn('❌ Service workers not supported in this browser');
+    return;
+  }
 
-  const registration = await navigator.serviceWorker.register('/service-worker.js');
+  if (!publicVapidKey) {
+    console.error('❌ VAPID public key is undefined. Check .env and restart the dev server.');
+    return;
+  }
 
-  const subscription = await registration.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: urlBase64ToUint8Array(publicVapidKey)
-  });
+  console.log('🔑 Loaded VAPID key:', publicVapidKey);
 
-  const res = await fetch('http://localhost:5000/api/push/subscribe', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${userToken}`
-    },
-    body: JSON.stringify(subscription)
-  });
+  let applicationServerKey;
+  try {
+    applicationServerKey = urlBase64ToUint8Array(publicVapidKey);
+    console.log('📏 Decoded VAPID key length:', applicationServerKey.length);
+  } catch (err) {
+    console.error('❌ Failed to decode VAPID key:', err);
+    return;
+  }
 
-  if (!res.ok) throw new Error('Failed to register subscription');
-  console.log('✅ Push subscription registered');
+  try {
+    const registration = await navigator.serviceWorker.register('/service-worker.js');
+    console.log('✅ Service worker registered');
+
+    const subscription = await registration.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey
+    });
+
+    const res = await fetch('http://localhost:5000/api/push/subscribe', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${userToken}`
+      },
+      body: JSON.stringify(subscription)
+    });
+
+    if (!res.ok) throw new Error('Failed to register subscription');
+    console.log('✅ Push subscription registered with server');
+  } catch (err) {
+    console.error('❌ Push subscription error:', err);
+  }
 }
 
-// Convert VAPID key
+
 function urlBase64ToUint8Array(base64String) {
+  if (!base64String || typeof base64String !== 'string') {
+    throw new TypeError('VAPID key must be a non-empty string');
+  }
+
   const padding = '='.repeat((4 - base64String.length % 4) % 4);
   const base64 = (base64String + padding)
     .replace(/-/g, '+').replace(/_/g, '/');
