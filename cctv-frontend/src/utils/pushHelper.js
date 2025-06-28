@@ -1,5 +1,11 @@
 const publicVapidKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
 
+const permission = await Notification.requestPermission();
+if (permission !== 'granted') {
+  throw new Error('Permission not granted for Notification');
+}
+
+
 export async function registerPushSubscription(userToken) {
   if (!('serviceWorker' in navigator)) {
     console.warn('❌ Service workers not supported in this browser');
@@ -7,24 +13,24 @@ export async function registerPushSubscription(userToken) {
   }
 
   if (!publicVapidKey) {
-    console.error('❌ VAPID public key is undefined. Check .env and restart the dev server.');
+    console.error(' VAPID public key is undefined. Check .env and restart the dev server.');
     return;
   }
 
-  console.log('🔑 Loaded VAPID key:', publicVapidKey);
+  console.log('Loaded VAPID key:', publicVapidKey);
 
   let applicationServerKey;
   try {
     applicationServerKey = urlBase64ToUint8Array(publicVapidKey);
-    console.log('📏 Decoded VAPID key length:', applicationServerKey.length);
+    console.log(' Decoded VAPID key length:', applicationServerKey.length);
   } catch (err) {
-    console.error('❌ Failed to decode VAPID key:', err);
+    console.error(' Failed to decode VAPID key:', err);
     return;
   }
 
   try {
     const registration = await navigator.serviceWorker.register('/service-worker.js');
-    console.log('✅ Service worker registered');
+    console.log(' Service worker registered');
 
     const subscription = await registration.pushManager.subscribe({
       userVisibleOnly: true,
@@ -41,9 +47,9 @@ export async function registerPushSubscription(userToken) {
     });
 
     if (!res.ok) throw new Error('Failed to register subscription');
-    console.log('✅ Push subscription registered with server');
+    console.log(' Push subscription registered with server');
   } catch (err) {
-    console.error('❌ Push subscription error:', err);
+    console.error(' Push subscription error:', err);
   }
 }
 
