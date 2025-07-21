@@ -6,35 +6,33 @@ const Sidebar = () => {
   const location = useLocation();
   const hideOnRoutes = ['/', '/login', '/signup'];
 
-  if (hideOnRoutes.includes(location.pathname)) {
-    return null; // Don't render sidebar on home/login/signup
-  }
+  if (hideOnRoutes.includes(location.pathname)) return null;
 
   const navItemClass = ({ isActive }) =>
-    `flex items-center px-4 py-3 rounded-lg hover:bg-blue-100 transition ${
-      isActive ? 'bg-blue-200 font-semibold text-blue-800' : 'text-gray-700'
-    }`;
+    `flex items-center gap-3 px-4 py-3 rounded-lg transition-colors duration-300 
+     ${isActive ? 'bg-blue-100 text-blue-700 font-semibold' : 'text-gray-600 hover:bg-gray-100'}`;
 
   return (
-    <aside className="w-64 bg-white shadow-lg h-screen fixed top-0 left-0 p-6 z-10">
-      <h1 className="text-2xl font-extrabold text-blue-600 mb-10 tracking-tight">
-        Smart CCTV
-      </h1>
+    <aside className="hidden md:block fixed left-0 top-0 h-screen w-64 bg-white shadow-lg p-6 z-20 overflow-y-auto border-r border-gray-200">
+      <div className="mb-10">
+        <h1 className="text-2xl font-bold text-blue-600 tracking-tight">Smart CCTV</h1>
+      </div>
+
       <nav className="flex flex-col space-y-2">
         <NavLink to="/dashboard" className={navItemClass}>
-          <FiHome className="mr-2" /> Dashboard
+          <FiHome size={18} /> <span>Dashboard</span>
         </NavLink>
         <NavLink to="/cameras" className={navItemClass}>
-          <FiCamera className="mr-2" /> Cameras
+          <FiCamera size={18} /> <span>Cameras</span>
         </NavLink>
         <NavLink to="/add-camera" className={navItemClass}>
-          <FiPlus className="mr-2" /> Add Camera
+          <FiPlus size={18} /> <span>Add Camera</span>
         </NavLink>
         <NavLink to="/footage-archive" className={navItemClass}>
-          <FiArchive className="mr-2" /> Archive
+          <FiArchive size={18} /> <span>Archive</span>
         </NavLink>
         <NavLink to="/logout" className={navItemClass}>
-          <FiLogOut className="mr-2" /> Logout
+          <FiLogOut size={18} /> <span>Logout</span>
         </NavLink>
       </nav>
     </aside>

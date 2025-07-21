@@ -9,7 +9,7 @@ const Dashboard = () => {
     const wsUrl = 'ws://localhost:9999';
 
     const script = document.createElement('script');
-    script.src = '/js/jsmpeg.min.js'; // ✅ Local path
+    script.src = '/js/jsmpeg.min.js';
     script.async = true;
 
     script.onload = () => {
@@ -24,7 +24,6 @@ const Dashboard = () => {
         audio: false,
       });
 
-      // Clean up player on unmount
       return () => player.destroy();
     };
 
@@ -34,23 +33,24 @@ const Dashboard = () => {
 
     document.body.appendChild(script);
 
-    // Clean up script tag on unmount
     return () => {
       document.body.removeChild(script);
     };
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
-      <div className="max-w-5xl mx-auto space-y-6">
-        <h1 className="text-3xl font-bold text-center">Live CCTV Dashboard</h1>
-        <div className="rounded-lg overflow-hidden border border-gray-700 shadow-lg">
+    <div className="bg-gray-50 text-gray-800 min-h-screen p-4">
+      <div className="bg-white p-6 rounded-lg shadow-md max-w-5xl mx-auto">
+        <h1 className="text-3xl font-bold text-center text-blue-600 mb-6">
+          Live CCTV Dashboard
+        </h1>
+        <div className="rounded overflow-hidden border border-gray-300 shadow">
           <canvas ref={canvasRef} className="w-full h-[500px] bg-black" />
         </div>
-        <div className="text-center">
+        <div className="text-center mt-6">
           <button
             onClick={() => navigate('/logout')}
-            className="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md"
+            className="px-6 py-2 bg-red-600 hover:bg-red-700 text-white rounded-md shadow"
           >
             Log Out
           </button>
