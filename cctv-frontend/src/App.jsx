@@ -4,7 +4,7 @@ import HomePage from './pages/homepage/HomePage';
 import LoginPage from './pages/loginpage/LoginPage';
 import SignupPage from './pages/signuppage/SignupPage';
 import Dashboard from './pages/dashboard/Dashboard';
-import LogoutPage from './pages/logoutpage/LogoutPage';
+import LogoutPage from './pages/logoutpage/LogOutpage';
 import ProtectedRoute from './components/protectedroute/ProtectedRoute';
 import FootageArchive from './pages/footagearchive/FootageArchive';
 import CamerasBySite from './pages/camerasbysite/CamerasBySite';
@@ -17,9 +17,9 @@ function App() {
   const isSidebarVisible = !hideSidebarOn.includes(location.pathname);
 
   return (
-    <div className="flex min-h-screen bg-gray-100 font-sans text-gray-800">
+    <div className="flex flex-col md:flex-row min-h-screen bg-gray-100 font-sans text-gray-800">
       {isSidebarVisible && <Sidebar />}
-      <main className={`${isSidebarVisible ? 'ml-64' : ''} flex-1 p-6 transition-all`}>
+      <main className={`flex-1 p-4 sm:p-6 transition-all ${isSidebarVisible ? 'md:ml-64' : ''}`}>
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
