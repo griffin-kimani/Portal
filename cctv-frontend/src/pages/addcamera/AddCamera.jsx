@@ -1,30 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import api from '../../api';
 
 const AddCamera = () => {
-  const [sites, setSites] = useState([]);
   const [formData, setFormData] = useState({
     name: '',
     location: '',
     rtspUrl: '',
-    siteId: ''
+    siteName: ''
   });
   const [message, setMessage] = useState('');
-
-  useEffect(() => {
-    const fetchSites = async () => {
-      const res = await api.get('/sites');
-      setSites(res.data);
-    };
-    fetchSites();
-  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       const res = await api.post('/cameras/add', formData);
-      setMessage(res.data.message);
-      setFormData({ name: '', location: '', rtspUrl: '', siteId: '' });
+      setMessage(res.data.message || 'Camera added successfully');
+      setFormData({ name: '', location: '', rtspUrl: '', siteName: '' });
     } catch (err) {
       setMessage('Error adding camera');
     }
@@ -41,7 +32,7 @@ const AddCamera = () => {
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
           required
-          className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 border rounded"
         />
         <input
           type="text"
@@ -49,7 +40,7 @@ const AddCamera = () => {
           value={formData.location}
           onChange={(e) => setFormData({ ...formData, location: e.target.value })}
           required
-          className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 border rounded"
         />
         <input
           type="text"
@@ -57,25 +48,20 @@ const AddCamera = () => {
           value={formData.rtspUrl}
           onChange={(e) => setFormData({ ...formData, rtspUrl: e.target.value })}
           required
-          className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full p-3 border rounded"
         />
-        <select
-          value={formData.siteId}
-          onChange={(e) => setFormData({ ...formData, siteId: e.target.value })}
+        <input
+          type="text"
+          placeholder="Enter Site Name"
+          value={formData.siteName}
+          onChange={(e) => setFormData({ ...formData, siteName: e.target.value })}
           required
-          className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="">-- Select Site --</option>
-          {sites.map((site) => (
-            <option key={site._id} value={site._id}>
-              {site.name}
-            </option>
-          ))}
-        </select>
+          className="w-full p-3 border rounded"
+        />
 
         <button
           type="submit"
-          className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition duration-300"
+          className="w-full bg-blue-600 text-white py-3 rounded hover:bg-blue-700 transition"
         >
           Add Camera
         </button>
